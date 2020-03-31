@@ -103,7 +103,8 @@ Get-VMHost | Get-VMHostNetwork | Select-Object VMHost, HostName
 # Get all ESXi hosts and get their configured NTP server(s)
 Get-VMHost | Get-VMHostNtpServer
 
-
+#################################
+# Break Point
 #################################
 
 # Connect to a vCenter server
