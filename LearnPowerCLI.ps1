@@ -1,3 +1,5 @@
+#Basic One liners for managing vSphere
+
 # Connects to a vCenter
 Connect-VIServer -Server mzvmvcs001.martinez.local
 
