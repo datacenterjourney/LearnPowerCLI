@@ -1,3 +1,7 @@
+###########################
+# Getting started with PowerCLI
+###########################
+
 # Install PowerCLI Module
 Install-Module -Name VMware.PowerCLI [-Scope CurrentUser | AllUsers]
 
@@ -40,12 +44,6 @@ Get-VMHost
 # Gets all ESXi Hosts and all of it's properties
 Get-VMHost | Select-Object *
 
-# Gets all ESXi Hosts (Low Level Command)
-Get-View -ViewType HostSystem 
-
-# Get a specific ESXi Host
-Get-View -ViewType HostSystem -Filter @{"Name" = "mzvmesx001.martinez.local"}
-
 # Get specific properties of an ESXi host
 Get-VMHost | Select-Object Name, Version, Manufacturer, Model
 
@@ -64,32 +62,15 @@ Get-VMHost mzvmesx001.martinez.local | Get-VM | Where-Object {$_.PowerState -eq 
 # Gets all VMs where the Number of CPUs is Greater Than or Equal to 2
 Get-VM | Where-Object {$_.NumCpu -ge 2}
 
-# Gets a VM by a specific name
-Get-VM -Name test
+# Get all ESX hosts, then get their Host Network Information, and only return the Properties and Values VMHost & HostName
+Get-VMHost | Get-VMHostNetwork | Select-Object VMHost, HostName
 
-# Retrieve specific VM
-$vm = Get-VM -Name test 
+# Get all ESXi hosts and get their configured NTP server(s)
+Get-VMHost | Get-VMHostNtpServer
 
-# View the variable of the VM object and view it's extention data
-$vm.ExtensionData
-
-# Get all VMs in vCenter in the ad
-Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
-$vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
-$vmView
-$vmView | Get-Member
-
-# Gets a VM by a specific name and stores the result in a variable
-$testVm = Get-VM -Name test
-$testVm.ExtensionData | Get-Member
-$testVm.ExtensionData | Get-Member -MemberType Method
-$testVm.ExtensionData | Get-Member -MemberType Properties
-
-# Using the Variable to return only a property value
-$testVm.HardwareVersion
-
-# Using the Variable object and selecting only a Property and it's value
-$testVm | Select-Object HardwareVersion
+##############################
+# Using variables to store objects and view info
+##############################
 
 # Gettimg all ESXi hosts and storing object result in a variable
 $esx = Get-VMHost
@@ -115,17 +96,15 @@ $esx.DnsAddress
 # Return the 2nd DNS address value of ESXi host network info from variable
 $esx.DnsAddress[1]
 
+##############################
+# Searching for commands
+##############################
+
+# Gets a VM by a specific name
+Get-VM -Name test
+
 # Searching for commands in the VMware Modules that contain the word "start"
 Get-Command start-* -Module VMware*
-
-# Gets a specific VM and it's hard disk information
-Get-VM -Name Test | Get-HardDisk | Select-Object *
-
-# Gets all VMs there hard disks and shows only the VM, Format & VMDK file location
-Get-VM | Get-HardDisk | Select-Object Parent, StorageFormat, Filename
-
-# Performs a storage vMotion and changes the disk format
-Move-VM -VM test -Datastore SATA_1TB_Disk3 -DiskStorageFormat Thin
 
 # Get the help information from the command "Start-VM"
 Get-Help Start-VM
@@ -133,20 +112,60 @@ Get-Help Start-VM
 # Getting a specific VM and then powering it on
 Get-VM -Name test | Start-VM
 
+# Search for command with "guest" in the name in the VMware modules
+Get-Command *guest* -module VMware*
+
 # Gracefully shutting down a specific VM and NOT have it prompt for confirmation 
 Shutdown-VMGuest -VM test -Confirm:$false
 
-# Search for command with "guest" in the name in the VMware modules
-Get-Command *guest* -module VMware*
+# Gets a specific VM and it's hard disk information
+Get-VM -Name Test | Get-HardDisk | Select-Object *
+
+# Gets all VMs there hard disks and shows only the VM, Format & VMDK file location
+Get-VM | Get-HardDisk | Select-Object Parent, StorageFormat, Filename
 
 # Get help examples on the command "Move-VM"
 Get-Help Move-VM -Examples
 
-# Get all ESX hosts, then get their Host Network Information, and only return the Properties and Values VMHost & HostName
-Get-VMHost | Get-VMHostNetwork | Select-Object VMHost, HostName
+# Performs a storage vMotion and changes the disk format
+Move-VM -VM test -Datastore SATA_1TB_Disk3 -DiskStorageFormat Thin
 
-# Get all ESXi hosts and get their configured NTP server(s)
-Get-VMHost | Get-VMHostNtpServer
+
+###############################
+# Explain Get-View
+###############################
+
+
+# Retrieve specific VM
+$vm = Get-VM -Name test 
+
+# Gets all ESXi Hosts (Low Level Command)
+Get-View -ViewType HostSystem 
+
+# Get a specific ESXi Host using the Get-View command and filtering for a specific host
+Get-View -ViewType HostSystem -Filter @{"Name" = "mzvmesx001.martinez.local"}
+
+# View the variable of the VM object and view it's extention data
+$vm.ExtensionData
+
+# Get a specific VM in View mode and store in variable
+Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+$vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+$vmView
+$vmView | Get-Member
+
+# Gets a VM by a specific name and stores the result in a variable
+$testVm = Get-VM -Name test
+$testVm.ExtensionData | Get-Member
+$testVm.ExtensionData | Get-Member -MemberType Method
+$testVm.ExtensionData | Get-Member -MemberType Properties
+
+# Using the Variable to return only a property value
+$testVm.HardwareVersion
+
+# Using the Variable object and selecting only a Property and it's value
+$testVm | Select-Object HardwareVersion
+
 
 #################################
 # Break Point
