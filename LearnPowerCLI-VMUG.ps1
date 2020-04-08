@@ -168,7 +168,7 @@ $testVm | Select-Object HardwareVersion
 
 
 #################################
-# Break Point
+# Managing Guest OS through VMTools
 #################################
 
 # Start VM
