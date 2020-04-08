@@ -1,9 +1,14 @@
 # Install PowerCLI Module
 Install-Module -Name VMware.PowerCLI [-Scope CurrentUser | AllUsers]
 
-# View installed Module(s)
-Get-Module -Name VMware* -ListAvailable
+# View installed PowerCLI Module
+Get-Module -Name VMware.PowerCLI -ListAvailable
 
+# Upgrade PowerCLI Module
+Update-Module -Name VMware.PowerCLI
+
+# View installed PowerCLI Module
+Get-Module -Name VMware.PowerCLI -ListAvailable
 
 # Connects to a vCenter
 Connect-VIServer -Server mzvmvcs001.martinez.local
@@ -29,14 +34,20 @@ Get-Help Get-VMHost -Detailed
 # Show Full Help
 Get-Help Get-VMHost -Full
 
-# Gets all ESXi Hosts
+# Gets all ESXi Hosts (High Level Command)
 Get-VMHost 
 
 # Gets all ESXi Hosts and all of it's properties
 Get-VMHost | Select-Object *
 
-# Gets ESXi hosts with number 1,2,or 3 in the 10th spot
-Get-VMHost -Server mzvmvcs00[1-3]*
+# Gets all ESXi Hosts (Low Level Command)
+Get-View -ViewType HostSystem 
+
+# Get a specific ESXi Host
+Get-View -ViewType HostSystem -Filter @{"Name" = "mzvmesx001.martinez.local"}
+
+# Get specific properties of an ESXi host
+Get-VMHost | Select-Object Name, Version, Manufacturer, Model
 
 # Gets single ESXi host and all the VMs running on it
 Get-VMHost mzvmesx001.martinez.local | Get-VM 
@@ -47,23 +58,44 @@ Get-VMHost mzvmesx001.martinez.local | Get-VM | Sort-Object PowerState
 # Gets single ESXi host and all the VMs running on it where the PowerState is PoweredOn
 Get-VMHost mzvmesx001.martinez.local | Get-VM | Where-Object {$_.PowerState -eq "PoweredOn"}
 
+# Gets single ESXi host and all Powered On VMs sorted by Name running on the host
+Get-VMHost mzvmesx001.martinez.local | Get-VM | Where-Object {$_.PowerState -eq "PoweredOn"} | Sort-Object Name
+
 # Gets all VMs where the Number of CPUs is Greater Than or Equal to 2
 Get-VM | Where-Object {$_.NumCpu -ge 2}
 
 # Gets a VM by a specific name
-Get-VM -Name mzvmvro001
+Get-VM -Name test
+
+# Retrieve specific VM
+$vm = Get-VM -Name test 
+
+# View the variable of the VM object and view it's extention data
+$vm.ExtensionData
+
+# Get all VMs in vCenter in the ad
+Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+$vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+$vmView
+$vmView | Get-Member
 
 # Gets a VM by a specific name and stores the result in a variable
-$vRO = Get-VM -Name mzvmvro001
+$testVm = Get-VM -Name test
+$testVm.ExtensionData | Get-Member
+$testVm.ExtensionData | Get-Member -MemberType Method
+$testVm.ExtensionData | Get-Member -MemberType Properties
 
 # Using the Variable to return only a property value
-$vRO.Version
+$testVm.HardwareVersion
 
 # Using the Variable object and selecting only a Property and it's value
-$vRO | Select-Object Version
+$testVm | Select-Object HardwareVersion
 
 # Gettimg all ESXi hosts and storing object result in a variable
 $esx = Get-VMHost
+
+# View object stored in variable
+$esx
 
 # Returning the Model property value from a variable
 $esx.Model
@@ -71,7 +103,7 @@ $esx.Model
 # Storing the host network information of an ESXi host in a variable
 $esx = Get-VMHostNetwork -VMHost mzvmesx001.martinez.local
 
-# Viewing the ESXi host network variable object
+# Viewing new ESXi host network variable object
 $esx
 
 # Viewing all the properties of an ESXi host network variable object
@@ -86,17 +118,23 @@ $esx.DnsAddress[1]
 # Searching for commands in the VMware Modules that contain the word "start"
 Get-Command start-* -Module VMware*
 
+# Gets a specific VM and it's hard disk information
+Get-VM -Name Test | Get-HardDisk | Select-Object *
+
+# Gets all VMs there hard disks and shows only the VM, Format & VMDK file location
+Get-VM | Get-HardDisk | Select-Object Parent, StorageFormat, Filename
+
+# Performs a storage vMotion and changes the disk format
+Move-VM -VM test -Datastore SATA_1TB_Disk3 -DiskStorageFormat Thin
+
 # Get the help information from the command "Start-VM"
 Get-Help Start-VM
 
 # Getting a specific VM and then powering it on
-Get-VM -Name mzvmvro001 | Start-VM
-
-# Starting specific VMs
-Start-VM -VM mzvmesx006, mzvmesx007
+Get-VM -Name test | Start-VM
 
 # Gracefully shutting down a specific VM and NOT have it prompt for confirmation 
-Shutdown-VMGuest -VM mzvmvro001 -Confirm:$false
+Shutdown-VMGuest -VM test -Confirm:$false
 
 # Search for command with "guest" in the name in the VMware modules
 Get-Command *guest* -module VMware*
@@ -114,8 +152,8 @@ Get-VMHost | Get-VMHostNtpServer
 # Break Point
 #################################
 
-# Connect to a vCenter server
-# Connect-VIServer mzvmvcs001.martinez.local
+# Start VM
+Start-VM -VM test
 
 # Get specific VM and get it's network adapter info
 Get-VM test | Get-NetworkAdapter
