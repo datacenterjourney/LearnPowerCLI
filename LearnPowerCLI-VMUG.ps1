@@ -23,6 +23,8 @@ Get-Verb
 # Find commands
 Get-Command get-*host*
 
+
+
 # Find commands from specific module
 Get-Command get-*host* -Module VMware*
 
@@ -60,10 +62,10 @@ Get-VMHost mzvmesx001.martinez.local | Get-VM | Where-Object {$_.PowerState -eq 
 Get-VMHost mzvmesx001.martinez.local | Get-VM | Where-Object {$_.PowerState -eq "PoweredOn"} | Sort-Object Name
 
 # Gets all VMs where the Number of CPUs is Greater Than or Equal to 2
-Get-VM | Where-Object {$_.NumCpu -ge 2}
+Get-VM | Where-Object {$_.NumCpu -gt 2}
 
 # Get all ESX hosts, then get their Host Network Information, and only return the Properties and Values VMHost & HostName
-Get-VMHost | Get-VMHostNetwork | Select-Object VMHost, HostName
+Get-VMHost | Get-VMHostNetwork | Format-List
 
 # Get all ESXi hosts and get their configured NTP server(s)
 Get-VMHost | Get-VMHostNtpServer
@@ -131,6 +133,7 @@ Get-Help Move-VM -Examples
 Move-VM -VM test -Datastore SATA_1TB_Disk3 -DiskStorageFormat Thin
 
 
+
 #################################
 # Managing Guest OS through VMTools
 #################################
@@ -156,6 +159,10 @@ Get-VMGuest -VM test | Select-Object OSFullName, IPAddress, State, Nics | Format
 # Open VM Console Window
 Open-VMConsoleWindow -VM Test
 
+#####################
+# Run in Windows Guest OS
+#####################
+
 # Get Windows network adapter info
 Get-NetAdapter
 
@@ -175,6 +182,9 @@ Get-NetIPAddress | Where-Object {($_.InterfaceAlias -eq "Ethernet0") -and ($_.Ad
 Get-NetIPAddress | Where-Object {($_.InterfaceAlias -eq "Ethernet0") -and ($_.AddressFamily -eq "IPv4")} | 
 Select-Object InterfaceAlias, IPAddress, AddressFamily, InterfaceIndex | Format-List
 
+
+############
+
 # Get help on Invoke-VMScript with examples
 Get-Help Invoke-VMScript -Examples
 
@@ -190,10 +200,10 @@ Test-NetConnection 10.100.20.210
 Test-NetConnection www.google.com
 
 # Store IP command script in a variable
-$ipScript = 'New-NetIPAddress -InterfaceIndex 3 -IPAddress 10.100.20.45 -PrefixLength 24 -DefaultGateway 10.100.20.1'
+$ipScript = 'New-NetIPAddress -InterfaceIndex 12 -IPAddress 10.100.20.45 -PrefixLength 24 -DefaultGateway 10.100.20.1'
 
 # Store DNS command script in a variable
-$dnsScript = 'Set-DnsClientServerAddress -InterfaceIndex 3 -ServerAddresses 10.100.20.210'
+$dnsScript = 'Set-DnsClientServerAddress -InterfaceIndex 12 -ServerAddresses 10.100.20.210'
 
 # Send network adapter commands to Guest OS through VM tools to set IP addr
 Invoke-VMScript -ScriptText $ipScript -VM test -GuestCredential $winCreds -ScriptType Powershell
@@ -212,7 +222,7 @@ Invoke-VMScript -ScriptText 'Get-NetFirewallProfile' -VM test -GuestCredential $
 Invoke-VMScript -ScriptText 'Get-NetFirewallProfile | Select-Object Name, Enabled' -VM test -GuestCredential $winCreds -ScriptType Powershell
 
 # Turn off Windows Firewall
-Invoke-VMScript -ScriptText 'Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False' -VM test -GuestCredential `
+Invoke-VMScript -ScriptText 'Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True' -VM test -GuestCredential `
 $winCreds -ScriptType Powershell
 
 # Test pinging VM by name and IP
@@ -236,10 +246,13 @@ Get-View -ViewType HostSystem
 Get-View -ViewType HostSystem -Filter @{"Name" = "mzvmesx001.martinez.local"}
 
 # View the variable of the VM object and view it's extention data
+$vm | Select *
 $vm.ExtensionData
 
 # Get a specific VM in View mode and store in variable
 Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+
+
 $vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
 $vmView
 $vmView | Get-Member
@@ -259,3 +272,7 @@ $testVm | Select-Object HardwareVersion
 #######################
 # Talk about Code Capture
 ########################
+
+
+$_this = Get-View -Id 'VirtualMachine-vm-145'
+$_this.RebootGuest()
