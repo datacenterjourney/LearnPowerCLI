@@ -131,42 +131,6 @@ Get-Help Move-VM -Examples
 Move-VM -VM test -Datastore SATA_1TB_Disk3 -DiskStorageFormat Thin
 
 
-###############################
-# Explain Get-View
-###############################
-
-
-# Retrieve specific VM
-$vm = Get-VM -Name test 
-
-# Gets all ESXi Hosts (Low Level Command)
-Get-View -ViewType HostSystem 
-
-# Get a specific ESXi Host using the Get-View command and filtering for a specific host
-Get-View -ViewType HostSystem -Filter @{"Name" = "mzvmesx001.martinez.local"}
-
-# View the variable of the VM object and view it's extention data
-$vm.ExtensionData
-
-# Get a specific VM in View mode and store in variable
-Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
-$vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
-$vmView
-$vmView | Get-Member
-
-# Gets a VM by a specific name and stores the result in a variable
-$testVm = Get-VM -Name test
-$testVm.ExtensionData | Get-Member
-$testVm.ExtensionData | Get-Member -MemberType Method
-$testVm.ExtensionData | Get-Member -MemberType Properties
-
-# Using the Variable to return only a property value
-$testVm.HardwareVersion
-
-# Using the Variable object and selecting only a Property and it's value
-$testVm | Select-Object HardwareVersion
-
-
 #################################
 # Managing Guest OS through VMTools
 #################################
@@ -254,3 +218,44 @@ $winCreds -ScriptType Powershell
 # Test pinging VM by name and IP
 Test-NetConnection test
 Test-NetConnection 10.100.20.45
+
+
+
+###############################
+# Explain Get-View
+###############################
+
+
+# Retrieve specific VM
+$vm = Get-VM -Name test 
+
+# Gets all ESXi Hosts (Low Level Command)
+Get-View -ViewType HostSystem 
+
+# Get a specific ESXi Host using the Get-View command and filtering for a specific host
+Get-View -ViewType HostSystem -Filter @{"Name" = "mzvmesx001.martinez.local"}
+
+# View the variable of the VM object and view it's extention data
+$vm.ExtensionData
+
+# Get a specific VM in View mode and store in variable
+Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+$vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = "test"}
+$vmView
+$vmView | Get-Member
+
+# Gets a VM by a specific name and stores the result in a variable
+$testVm = Get-VM -Name test
+$testVm.ExtensionData | Get-Member
+$testVm.ExtensionData | Get-Member -MemberType Method
+$testVm.ExtensionData | Get-Member -MemberType Properties
+
+# Using the Variable to return only a property value
+$testVm.HardwareVersion
+
+# Using the Variable object and selecting only a Property and it's value
+$testVm | Select-Object HardwareVersion
+
+#######################
+# Talk about Code Capture
+########################
